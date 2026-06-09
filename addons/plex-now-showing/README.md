@@ -4,6 +4,19 @@ Cinema-style now-playing and coming-soon kiosk for Home Assistant, installed
 straight from the Home Assistant add-on store. One click, no long-lived access
 token, no Docker command line.
 
+## What's new in 2.3.4
+
+- **Instant setup propagation** — saving or resetting the in-app setup overlay
+  broadcasts a sanitized `config_changed` event over SSE. Open kiosks switch
+  between Now Showing and Coming Soon, update backend/source settings, and apply
+  visual changes without a browser refresh.
+- **Coming Soon auto-cycle** — Coming Soon mode rotates on the configured
+  `coming_soon_cycle_interval` without full-page reloads, and timer changes take
+  effect immediately.
+- **Smooth poster crossfade** — artwork now preloads into a second poster layer
+  and crossfades into place, preventing black flashes during Coming Soon rotation
+  while preserving the server `/api/artwork` proxy path.
+
 ## What's new in 2.3.2
 
 - **Fixed all requests returning `:ok`** — the SSE endpoint was registered with

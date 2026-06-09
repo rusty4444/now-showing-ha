@@ -345,6 +345,7 @@ test('GET /api exposes the configured backend', async () => {
 
 test('GET /api/coming-soon returns configured upcoming items', async () => {
   const originalFetch = globalThis.fetch;
+  const futureRelease = new Date(Date.now() + 14 * 86400000).toISOString();
   globalThis.fetch = async () => ({
     ok: true,
     status: 200,
@@ -352,7 +353,7 @@ test('GET /api/coming-soon returns configured upcoming items', async () => {
       id: 1,
       title: 'The Future',
       year: 2026,
-      digitalRelease: '2026-06-01T00:00:00Z',
+      digitalRelease: futureRelease,
       hasFile: false,
       images: [{ coverType: 'poster', remoteUrl: 'https://img/poster.jpg' }],
     }],

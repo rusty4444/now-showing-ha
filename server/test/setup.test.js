@@ -156,6 +156,44 @@ test('POST /api/setup persists settings server-side and another client sees them
   assert.equal(JSON.stringify(seen).includes('fresh-radarr-key'), false);
 });
 
+async function readNextSseData(reader) {
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) return null;
+    buffer += decoder.decode(value, { stream: true });
+    const match = buffer.match(/^data: (.*)$/m);
+    if (match) return JSON.parse(match[1]);
+  }
+}
+
+test('POST /api/setup broadcasts config_changed over SSE', async (t) => {
+  const a = await startApp(t, { config: envBaseConfig({ haToken: 'super-secret-ha-token' }) });
+  const events = await fetch(`${a.url}/api/events`);
+  assert.equal(events.status, 200);
+  const reader = events.body.getReader();
+  t.after(() => reader.cancel().catch(() => {}));
+
+  // Wait until the SSE route has registered the client; the initial heartbeat
+  // is written before registration, so the next tick is enough for Express to
+  // finish adding the response to the broadcaster set.
+  await new Promise(resolve => setImmediate(resolve));
+
+  const saveResp = await fetch(`${a.url}/api/setup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ displayMode: 'coming_soon', comingSoon: { moviesCount: 7 } }),
+  });
+  assert.equal(saveResp.status, 200);
+
+  const event = await readNextSseData(reader);
+  assert.equal(event.type, 'config_changed');
+  assert.equal(event.config.displayMode, 'coming_soon');
+  assert.equal(event.config.comingSoon.moviesCount, 7);
+  assert.equal(JSON.stringify(event).includes('super-secret-ha-token'), false, 'SSE config event must not leak HA token');
+});
+
 test('POST /api/setup with blank secret preserves the existing saved secret', async (t) => {
   const overlayPath = tmpStorePath(t);
   const a = await startApp(t, { overlayPath });

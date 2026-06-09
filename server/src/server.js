@@ -102,7 +102,7 @@ export function createApp({ config, haClient, overlayStore, baseConfig }) {
   app.use(rootRoute({ config, version: pkg.version }));
   app.use(healthzRoute({ config, version: pkg.version }));
   app.use(configRoute({ config }));
-  app.use(setupRoute({ baseConfig: baseline, liveConfig: config, store }));
+  app.use(setupRoute({ baseConfig: baseline, liveConfig: config, store, eventBus }));
   app.use(stateRoute({ haClient, cache: stateCache, config }));
   app.use(mediaInfoRoute({ cache: mediaInfoCache, config }));
   app.use(artworkRoute({ config }));
