@@ -901,7 +901,7 @@
       50%  { transform: scale(1.08) translate(-2%, -1%); }
       100% { transform: scale(1.0) translate(0, 0); }
     }
-    body.visual-ken-burns .poster-area.loaded {
+    body.visual-ken-burns #posterArea.loaded {
       animation: ken-burns 30s ease-in-out infinite;
       will-change: transform;
     }
@@ -1063,6 +1063,11 @@
 
     .poster-area.loaded {
       opacity: 1;
+    }
+
+    .poster-area-next {
+      z-index: 1;
+      pointer-events: none;
     }
 
     /* ===== BACKDROP ART ON PAUSE (#21) =====
@@ -2678,6 +2683,7 @@
       <div class="poster-bg-blur" id="posterBgBlur"></div>
       <!-- Poster foreground -->
       <div class="poster-area" id="posterArea"></div>
+      <div class="poster-area poster-area-next" id="posterAreaNext"></div>
 
       <!-- Overlays on top of poster -->
       <div class="poster-overlay" id="posterOverlay" style="display:none;"></div>
@@ -3027,6 +3033,67 @@
       return Math.max(min, Math.min(max, n));
     }
 
+
+    function applyServerRuntimeConfig(body) {
+      if (!body || typeof body !== 'object') return;
+      if (body.backend) ACTIVE_BACKEND = readBackend(body.backend);
+      if (body.displayMode) DISPLAY_MODE = readDisplayMode(body.displayMode);
+      if (body.comingSoon) {
+        const cs = body.comingSoon;
+        if (typeof cs.title === 'string') COMING_SOON.title = cs.title || 'Coming Soon';
+        if (Number.isFinite(cs.moviesCount)) COMING_SOON.moviesCount = cs.moviesCount;
+        if (Number.isFinite(cs.showsCount)) COMING_SOON.showsCount = cs.showsCount;
+        if (Number.isFinite(cs.cycleInterval)) COMING_SOON.cycleInterval = Math.max(2, Math.min(300, cs.cycleInterval));
+        if (Number.isFinite(cs.daysOffset)) COMING_SOON.daysOffset = cs.daysOffset;
+        if (Number.isFinite(cs.lookaheadDays)) COMING_SOON.lookaheadDays = cs.lookaheadDays;
+        if (cs.imageType === 'poster' || cs.imageType === 'fanart') COMING_SOON.imageType = cs.imageType;
+        if (typeof cs.includeCinemaReleases === 'boolean') COMING_SOON.includeCinemaReleases = cs.includeCinemaReleases;
+      }
+      const v = body.visual;
+      if (v && typeof v.progressBar === 'boolean') VISUAL.progressBar = v.progressBar;
+      if (v && typeof v.ratingsBadges === 'boolean') VISUAL.ratingsBadges = v.ratingsBadges;
+      if (v && typeof v.genreChips === 'boolean') VISUAL.genreChips = v.genreChips;
+      if (v && typeof v.infoPanelMode === 'string' && INFO_PANEL_MODES.includes(v.infoPanelMode)) VISUAL.infoPanelMode = v.infoPanelMode;
+      if (v && typeof v.frameStyle === 'string' && FRAME_STYLES.includes(v.frameStyle)) VISUAL.frameStyle = v.frameStyle;
+      if (v && Number.isFinite(v.bulbSizePx)) VISUAL.bulbSizePx = Math.max(12, Math.min(48, v.bulbSizePx));
+      if (v && typeof v.marqueeFont === 'string' && MARQUEE_FONTS.includes(v.marqueeFont)) VISUAL.marqueeFont = v.marqueeFont;
+      if (v && typeof v.posterFraming === 'string' && POSTER_FRAMINGS.includes(v.posterFraming)) VISUAL.posterFraming = v.posterFraming;
+      if (v && typeof v.filmGrain === 'boolean') VISUAL.filmGrain = v.filmGrain;
+      if (v && typeof v.kenBurns === 'boolean') VISUAL.kenBurns = v.kenBurns;
+      if (v && typeof v.useBackdrops === 'boolean') VISUAL.useBackdrops = v.useBackdrops;
+      if (v && typeof v.backdropStyle === 'string' && BACKDROP_STYLES.includes(v.backdropStyle)) VISUAL.backdropStyle = v.backdropStyle;
+      if (v && Number.isFinite(v.backdropDelayMs)) VISUAL.backdropDelayMs = Math.max(1000, Math.min(600000, v.backdropDelayMs));
+      if (v && typeof v.burnInMitigation === 'boolean') VISUAL.burnInMitigation = v.burnInMitigation;
+      if (v && Number.isFinite(v.nudgeIntervalMs)) VISUAL.nudgeIntervalMs = v.nudgeIntervalMs;
+      if (v && Number.isFinite(v.nudgeAmplitudePx)) VISUAL.nudgeAmplitudePx = v.nudgeAmplitudePx;
+      if (v && typeof v.nightModeEntity === 'string') VISUAL.nightModeEntity = v.nightModeEntity;
+      if (v && Number.isFinite(v.nightModeOpacity)) VISUAL.nightModeOpacity = v.nightModeOpacity;
+      if (v && typeof v.theme === 'string' && VISUAL_THEMES.includes(v.theme)) VISUAL.theme = v.theme;
+      if (v && typeof v.accentColor === 'string') {
+        const c = v.accentColor.trim().toLowerCase();
+        if (c === '' || HEX_RE.test(c)) VISUAL.accentColor = c;
+        else {
+          console.warn('[plex-now-showing] Ignoring invalid server accentColor:', c);
+          VISUAL.accentColor = '';
+        }
+      }
+      if (v && typeof v.marqueeBgColor === 'string') {
+        const c = v.marqueeBgColor.trim().toLowerCase();
+        if (c === '' || HEX_RE.test(c)) VISUAL.marqueeBgColor = c;
+        else {
+          console.warn('[plex-now-showing] Ignoring invalid server marqueeBgColor:', c);
+          VISUAL.marqueeBgColor = '';
+        }
+      }
+      if (v && Number.isFinite(v.cornerRadiusPx)) VISUAL.cornerRadiusPx = Math.max(0, Math.min(48, v.cornerRadiusPx));
+      if (v && typeof v.infoShowTitle === 'boolean') VISUAL.infoShowTitle = v.infoShowTitle;
+      if (v && typeof v.infoShowSubtitle === 'boolean') VISUAL.infoShowSubtitle = v.infoShowSubtitle;
+      if (v && typeof v.infoShowMeta === 'boolean') VISUAL.infoShowMeta = v.infoShowMeta;
+      if (v && typeof v.infoShowSummary === 'boolean') VISUAL.infoShowSummary = v.infoShowSummary;
+      if (v && typeof v.infoShowTechbox === 'boolean') VISUAL.infoShowTechbox = v.infoShowTechbox;
+      if (v && typeof v.infoShowPlayer === 'boolean') VISUAL.infoShowPlayer = v.infoShowPlayer;
+    }
+
     async function loadVisualConfig() {
       // Local overrides apply first so the tablet still looks right even if
       // the server is briefly unreachable.
@@ -3069,84 +3136,7 @@
         const resp = await fetch('/api/config', { cache: 'no-store' });
         if (!resp.ok) return;
         const body = await resp.json();
-        if (body && body.backend) ACTIVE_BACKEND = readBackend(body.backend);
-        if (body && body.displayMode) DISPLAY_MODE = readDisplayMode(body.displayMode);
-        if (body && body.comingSoon) {
-          const cs = body.comingSoon;
-          if (typeof cs.title === 'string') COMING_SOON.title = cs.title || 'Coming Soon';
-          if (Number.isFinite(cs.moviesCount)) COMING_SOON.moviesCount = cs.moviesCount;
-          if (Number.isFinite(cs.showsCount)) COMING_SOON.showsCount = cs.showsCount;
-          if (Number.isFinite(cs.cycleInterval)) COMING_SOON.cycleInterval = cs.cycleInterval;
-          if (Number.isFinite(cs.daysOffset)) COMING_SOON.daysOffset = cs.daysOffset;
-          if (Number.isFinite(cs.lookaheadDays)) COMING_SOON.lookaheadDays = cs.lookaheadDays;
-          if (cs.imageType === 'poster' || cs.imageType === 'fanart') COMING_SOON.imageType = cs.imageType;
-          if (typeof cs.includeCinemaReleases === 'boolean') COMING_SOON.includeCinemaReleases = cs.includeCinemaReleases;
-        }
-        const v = body && body.visual;
-        if (v && typeof v.progressBar === 'boolean') VISUAL.progressBar = v.progressBar;
-        if (v && typeof v.ratingsBadges === 'boolean') VISUAL.ratingsBadges = v.ratingsBadges;
-        if (v && typeof v.genreChips === 'boolean') VISUAL.genreChips = v.genreChips;
-        if (v && typeof v.infoPanelMode === 'string' && INFO_PANEL_MODES.includes(v.infoPanelMode)) {
-          VISUAL.infoPanelMode = v.infoPanelMode;
-        }
-        if (v && typeof v.frameStyle === 'string' && FRAME_STYLES.includes(v.frameStyle)) {
-          VISUAL.frameStyle = v.frameStyle;
-        }
-        if (v && Number.isFinite(v.bulbSizePx)) {
-          VISUAL.bulbSizePx = Math.max(12, Math.min(48, v.bulbSizePx));
-        }
-        if (v && typeof v.marqueeFont === 'string' && MARQUEE_FONTS.includes(v.marqueeFont)) {
-          VISUAL.marqueeFont = v.marqueeFont;
-        }
-        if (v && typeof v.posterFraming === 'string' && POSTER_FRAMINGS.includes(v.posterFraming)) {
-          VISUAL.posterFraming = v.posterFraming;
-        }
-        if (v && typeof v.filmGrain === 'boolean') VISUAL.filmGrain = v.filmGrain;
-        if (v && typeof v.kenBurns === 'boolean') VISUAL.kenBurns = v.kenBurns;
-        if (v && typeof v.useBackdrops === 'boolean') VISUAL.useBackdrops = v.useBackdrops;
-        if (v && typeof v.backdropStyle === 'string' && BACKDROP_STYLES.includes(v.backdropStyle)) {
-          VISUAL.backdropStyle = v.backdropStyle;
-        }
-        if (v && Number.isFinite(v.backdropDelayMs)) {
-          VISUAL.backdropDelayMs = Math.max(1000, Math.min(600000, v.backdropDelayMs));
-        }
-        if (v && typeof v.burnInMitigation === 'boolean') VISUAL.burnInMitigation = v.burnInMitigation;
-        if (v && Number.isFinite(v.nudgeIntervalMs))     VISUAL.nudgeIntervalMs   = v.nudgeIntervalMs;
-        if (v && Number.isFinite(v.nudgeAmplitudePx))    VISUAL.nudgeAmplitudePx  = v.nudgeAmplitudePx;
-        if (v && typeof v.nightModeEntity === 'string')  VISUAL.nightModeEntity   = v.nightModeEntity;
-        if (v && Number.isFinite(v.nightModeOpacity))    VISUAL.nightModeOpacity  = v.nightModeOpacity;
-        if (v && typeof v.theme === 'string' && VISUAL_THEMES.includes(v.theme)) {
-          VISUAL.theme = v.theme;
-        }
-        // Server validates accentColor as #RRGGBB or empty; trust it but
-        // double-check on the client to defend against a stale or modified
-        // response.
-        if (v && typeof v.accentColor === 'string') {
-          const c = v.accentColor.trim().toLowerCase();
-          if (c === '' || HEX_RE.test(c)) VISUAL.accentColor = c;
-          else {
-            console.warn('[plex-now-showing] Ignoring invalid server accentColor:', c);
-            VISUAL.accentColor = '';
-          }
-        }
-        if (v && typeof v.marqueeBgColor === 'string') {
-          const c = v.marqueeBgColor.trim().toLowerCase();
-          if (c === '' || HEX_RE.test(c)) VISUAL.marqueeBgColor = c;
-          else {
-            console.warn('[plex-now-showing] Ignoring invalid server marqueeBgColor:', c);
-            VISUAL.marqueeBgColor = '';
-          }
-        }
-        if (v && Number.isFinite(v.cornerRadiusPx)) {
-          VISUAL.cornerRadiusPx = Math.max(0, Math.min(48, v.cornerRadiusPx));
-        }
-        // #64 — per-section info panel visibility (server override)
-        if (v && typeof v.infoShowTitle    === 'boolean') VISUAL.infoShowTitle    = v.infoShowTitle;
-        if (v && typeof v.infoShowSubtitle === 'boolean') VISUAL.infoShowSubtitle = v.infoShowSubtitle;
-        if (v && typeof v.infoShowMeta     === 'boolean') VISUAL.infoShowMeta     = v.infoShowMeta;
-        if (v && typeof v.infoShowSummary  === 'boolean') VISUAL.infoShowSummary  = v.infoShowSummary;
-        if (v && typeof v.infoShowTechbox  === 'boolean') VISUAL.infoShowTechbox  = v.infoShowTechbox;
-        if (v && typeof v.infoShowPlayer   === 'boolean') VISUAL.infoShowPlayer   = v.infoShowPlayer;
+        applyServerRuntimeConfig(body);
       } catch (err) {
         console.warn('[plex-now-showing] /api/config fetch failed — using local defaults.', err);
       }
@@ -4544,6 +4534,7 @@
 
     // ===== DOM REFS =====
     const posterArea = document.getElementById('posterArea');
+    const posterAreaNext = document.getElementById('posterAreaNext');
     const posterBgBlur = document.getElementById('posterBgBlur');
     const posterOverlay = document.getElementById('posterOverlay');
     const posterTitle = document.getElementById('posterTitle');
@@ -4569,6 +4560,9 @@
     let currentMediaData = null;
     let infoTimeout = null;
     let cachedMediaInfo = {};  // Cache Plex media info by ratingKey
+    let posterLoadSeq = 0;
+    let posterSwapTimer = null;
+    let posterTransitionResetTimer = null;
     const infoOverlay = document.getElementById('infoOverlay');
     const infoTitle = document.getElementById('infoTitle');
     const infoSubtitle = document.getElementById('infoSubtitle');
@@ -5710,16 +5704,37 @@
       isShowingMedia = true;
       hideInfo();
 
-      // Update poster background image
+      // Update poster via a double-buffered crossfade. Keep the current
+      // poster visible while the next image preloads, then swap layers after
+      // the CSS fade completes. This avoids black flashes during Coming Soon
+      // cycling and preserves the /api/artwork same-origin proxy path above.
+      const loadSeq = ++posterLoadSeq;
       const img = new Image();
       img.onload = () => {
-        posterArea.style.backgroundImage = `url(${artworkUrl})`;
-        posterArea.classList.add('loaded');
+        if (loadSeq !== posterLoadSeq) return;
+        if (posterSwapTimer) clearTimeout(posterSwapTimer);
+        if (posterTransitionResetTimer) clearTimeout(posterTransitionResetTimer);
+        posterAreaNext.style.transition = '';
+        posterAreaNext.style.backgroundImage = `url(${artworkUrl})`;
+        posterAreaNext.classList.add('loaded');
         // Also update blurred background for landscape mode
         posterBgBlur.style.backgroundImage = `url(${artworkUrl})`;
         posterBgBlur.classList.add('loaded');
+        posterSwapTimer = setTimeout(() => {
+          posterArea.style.backgroundImage = posterAreaNext.style.backgroundImage;
+          posterArea.classList.add('loaded');
+          posterAreaNext.style.transition = 'none';
+          posterAreaNext.classList.remove('loaded');
+          posterAreaNext.style.backgroundImage = '';
+          posterTransitionResetTimer = setTimeout(() => {
+            posterAreaNext.style.transition = '';
+            posterTransitionResetTimer = null;
+          }, 50);
+          posterSwapTimer = null;
+        }, 900);
       };
-      posterArea.classList.remove('loaded');
+      posterAreaNext.classList.remove('loaded');
+      posterAreaNext.style.backgroundImage = '';
       posterBgBlur.classList.remove('loaded');
       img.src = artworkUrl;
 
@@ -5804,8 +5819,14 @@
       currentMediaData = null;
       hideInfo();
 
+      posterLoadSeq++;
+      if (posterSwapTimer) { clearTimeout(posterSwapTimer); posterSwapTimer = null; }
+      if (posterTransitionResetTimer) { clearTimeout(posterTransitionResetTimer); posterTransitionResetTimer = null; }
       posterArea.classList.remove('loaded');
       posterArea.style.backgroundImage = '';
+      posterAreaNext.classList.remove('loaded');
+      posterAreaNext.style.transition = '';
+      posterAreaNext.style.backgroundImage = '';
       posterBgBlur.classList.remove('loaded');
       posterBgBlur.style.backgroundImage = '';
       posterOverlay.style.display = 'none';
@@ -5824,6 +5845,7 @@
     // Falls back to 30s polling if SSE fails or is unavailable.
     let sseSource = null;
     let sseFallbackTimer = null;
+    let comingSoonCycleTimer = null;
     const SSE_FALLBACK_INTERVAL = 30000;
 
     function startSseConnection() {
@@ -5847,6 +5869,22 @@
       sseSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          if (data && data.type === 'config_changed' && data.config) {
+            const previousMode = DISPLAY_MODE;
+            applyServerRuntimeConfig(data.config);
+            applyVisualToggles();
+            syncDisplayModeText();
+            syncFrameStyle();
+            if (DISPLAY_MODE === 'coming_soon') {
+              startComingSoonCycle();
+              poll();
+            } else {
+              stopComingSoonCycle();
+              if (previousMode !== DISPLAY_MODE) poll();
+            }
+            debugLogMsg(`[SSE] Config changed — displayMode: ${DISPLAY_MODE}`);
+            return;
+          }
           // Server sends null payload when nothing is playing
           if (data && data.state) {
             showMedia(data);
@@ -5881,6 +5919,22 @@
 
     // ===== POLLING LOOP =====
     // Primary: SSE push from server. Fallback: 30s poll.
+    // In Coming Soon mode, cycle by re-polling /api/coming-soon on the
+    // configured interval so posters rotate without a full page refresh.
+    function startComingSoonCycle() {
+      stopComingSoonCycle();
+      const ms = Math.max(2, Number(COMING_SOON.cycleInterval) || 8) * 1000;
+      comingSoonCycleTimer = setInterval(() => { void poll(); }, ms);
+      debugLogMsg(`[coming-soon] cycle started — every ${ms / 1000}s`);
+    }
+
+    function stopComingSoonCycle() {
+      if (!comingSoonCycleTimer) return;
+      clearInterval(comingSoonCycleTimer);
+      comingSoonCycleTimer = null;
+      debugLogMsg('[coming-soon] cycle stopped');
+    }
+
     async function poll() {
       const data = await fetchNowShowingData();
       if (data) {
@@ -5902,7 +5956,8 @@
       // Start SSE push connection — falls back to 30s poll automatically
       startSseConnection();
       // Do an immediate poll so the first render is instant (before SSE delivers)
-      poll();
+      void poll();
+      if (DISPLAY_MODE === 'coming_soon') startComingSoonCycle();
       startConnectionPolling();
       if (window.DEBUG_MODE) debugLogMsg('Debug mode enabled');
     }
@@ -5930,6 +5985,7 @@
     window.addEventListener('beforeunload', () => {
       if (sseSource) { sseSource.close(); sseSource = null; }
       if (sseFallbackTimer) { clearInterval(sseFallbackTimer); sseFallbackTimer = null; }
+      stopComingSoonCycle();
     });
   </script>
 </body>

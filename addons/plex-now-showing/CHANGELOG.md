@@ -3,6 +3,32 @@
 All notable changes to the Now Showing add-on will be documented here.
 The project follows [Semantic Versioning](https://semver.org/).
 
+## 2.3.4 - 2026-06-09
+
+### Added
+- Setup saves and resets now broadcast `config_changed` over the existing SSE
+  channel, so connected kiosks apply server-side configuration changes without a
+  manual refresh. Display mode, backend, Coming Soon, and visual settings update
+  from the sanitized `/api/setup` view; secret values are never sent.
+- Coming Soon mode now auto-cycles on the configured
+  `coming_soon_cycle_interval`, reloading the next upcoming item without a page
+  reload and restarting the timer immediately when that setting changes.
+- Poster changes now use a double-buffered crossfade with stale-image guards, so
+  Coming Soon rotations and live artwork changes do not flash black or regress to
+  an older slow-loading image.
+
+### Fixed
+- Ken Burns animation is restricted to the active poster layer so it does not
+  fight the crossfade buffer.
+- The Coming Soon route test now uses a date relative to the test run instead of
+  a fixed past date.
+
+## 2.3.3 - 2026-06-06
+
+### Changed
+- Maintenance release: dependency updates for the Node server (`ws` and
+  `express`) plus the non-standard entity artwork fix already present on main.
+
 ## 2.3.2 - 2026-05-19
 
 ### Fixed

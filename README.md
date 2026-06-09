@@ -6,9 +6,9 @@
   </a>
 </p>
 
-> This README describes Now Showing v2.3.0. This release builds on the
-> v2.1.0 foundation with a live streaming architecture, poster framing,
-> film-grain overlay, Ken Burns pan, self-hosted fonts, and more.
+> This README describes Now Showing v2.3.4. This release builds on the
+> v2.3.x live streaming architecture with instant setup propagation,
+> Coming Soon auto-cycling, and smooth poster crossfades.
 
 A full-screen cinema marquee display for Home Assistant that shows what is
 currently playing on Plex, Jellyfin, Emby, Kodi, Apple TV, generic streaming
@@ -50,23 +50,18 @@ All three paths use the same kiosk UI. The add-on and Docker paths add the
 Node server that proxies Home Assistant and Plex metadata so API tokens are
 not exposed to the tablet browser.
 
-## What's Changed From V2.1.0 To V2.3.0
+## What's Changed Since The Last Release
 
-V2.3.0 is the "cinematic depth" release. It refactors the live data feed, adds film-grade visual effects, self-hosts all resources, and gives fine-grained control over every info panel section.
+V2.3.4 focuses on live kiosk behaviour: configuration changes now reach open browsers immediately, Coming Soon screens cycle themselves, and poster transitions stay smooth.
 
-| Area | V2.3.0 change |
+| Area | V2.3.4 change |
 |------|---------------|
-| Live streaming architecture | **#10** — replaced polling with WebSocket (HA events) + SSE push to the browser. The kiosh now receives state changes in real time instead of hammering `/api/state` every 5 seconds. Graceful fallback to polling if SSE fails. Server-side WebSocket reconnection with exponential backoff. |
-| Poster framing | **#67** — new `visual_poster_framing` option (`centred` / `cover` / `matted`). `centred` renders the poster at natural aspect ratio with letterbox bars (closest to the classic cinema look). `cover` fills the poster frame entirely (crops portrait posters). `matted` shrinks the poster with a dark matte border and rounded corners. |
-| Film-grain overlay | **#27** — `visual_film_grain` toggle. When on, a subtle SVG noise texture overlays the entire screen for cinematic warmth. GPU-composited via CSS `mix-blend-mode: overlay; display: none` when off means zero performance impact. |
-| Ken Burns poster pan | **#22** — `visual_ken_burns` toggle. Slow zoom-in + translate on poster art, CSS `@keyframes` driven so it's GPU-composited with no JS timer overhead. |
-| Self-hosted Google Fonts | **#40** — 23 woff2 files bundled in `www/fonts/`, 48 inline `@font-face` declarations. Eliminates the Google Fonts CDN dependency (works offline, no external DNS/privacy leak, works behind firewalls). |
-| Per-section info toggles | **#64** — six new booleans (`visual_info_show_title`, `visual_info_show_subtitle`, `visual_info_show_meta`, `visual_info_show_summary`, `visual_info_show_techbox`, `visual_info_show_player`) that independently hide/show each section of the info panel. All default `true` for backward compatibility. Editable from the in-app setup overlay. |
-| Cross-device sync | Overlay store now persists every visual toggle server-side so the same values apply across browsers, tablets, and phones without per-device configuration. |
-| Bulb chase animation | **#16** — CSS `@keyframes` chase pattern on the bulb frame. GPU-composited animation replaces the static bulb glow from v2.1.0. Off (`display: none`) when `visual_frame_style` is not `bulbs`, so zero CPU cost. |
-| Connection status + debug | **#15** — live connection indicator (green dot / red dot) on the kiosk overlay. Debug mode logs connection events, SSE state, and reconnection attempts to the browser console. |
-| Dev health docs | **#37** — added `CONTRIBUTING.md`, issue templates (`bug.md`, `feature_request.md`), pull request template, and `CHANGELOG.md`. |
-| Release package | Home Assistant add-on versioned at `2.3.0`, with multi-arch Docker images built and published to GHCR via CI. |
+| Live setup sync | Saving or resetting `/api/setup` now broadcasts a sanitized `config_changed` event on `/api/events`, so open kiosks apply display mode, backend, Coming Soon, and visual setting changes without refresh. Secrets are still represented only as `*Set` booleans. |
+| Coming Soon cycle | Coming Soon mode starts a browser-side timer from `coming_soon_cycle_interval` and re-polls `/api/coming-soon` on that cadence, giving Radarr/Sonarr posters a screensaver-style rotation. SSE config changes restart or stop the timer immediately. |
+| Poster transition | Artwork updates now preload into a second poster layer and crossfade into the active layer, avoiding black flashes during rotations while keeping the existing `/api/artwork` proxy path intact. Slow stale image loads are ignored. |
+| Visual compatibility | Ken Burns animation is scoped to the active poster layer so it does not fight the crossfade buffer. Existing poster framing, overlay, backdrop, and artwork proxy behaviour is preserved. |
+| Test reliability | Added an SSE broadcast test for setup saves and made the Coming Soon route test date-relative so it does not fail after a fixed release date passes. |
+| Release package | Home Assistant add-on and Node server are versioned at `2.3.4`, with the release notes above replacing the old v2.3.0 comparison table. |
 
 ## Features
 
@@ -77,7 +72,8 @@ V2.3.0 is the "cinematic depth" release. It refactors the live data feed, adds f
 - Streaming app-name badges with app icons when Home Assistant exposes
   `app_name`, including Disney+, YouTube, Netflix, Plex, and similar apps.
 - Coming Soon mode for Radarr/Sonarr upcoming movies and episodes, with
-  rotating poster or fanart art for Fully Kiosk screensavers and automations.
+  configurable auto-cycling poster or fanart art for Fully Kiosk screensavers
+  and automations.
 - Optional exact player pinning via `player`.
 - Plex username filtering so shared Plex servers can show only your sessions.
 - Tap-for-info panel with synopsis, player, rating, duration, progress, and
@@ -90,6 +86,8 @@ V2.3.0 is the "cinematic depth" release. It refactors the live data feed, adds f
 - Optional film-grain overlay for cinematic warmth (GPU-composited, zero impact
   when off).
 - Optional Ken Burns poster pan (GPU-composited CSS `@keyframes` zoom + translate).
+- Smooth double-buffered poster crossfade for live artwork changes and Coming
+  Soon rotations.
 - Optional info-panel modes: `on_tap`, `on_pause`, or `always`.
 - Optional backdrop art on pause, either fullscreen landscape fade or ambient
   blurred fanart.
@@ -107,6 +105,8 @@ V2.3.0 is the "cinematic depth" release. It refactors the live data feed, adds f
   `playfair-display`.
 - Optional Fully Kiosk Browser auto-switching between your dashboard and the
   Now Showing page.
+- Open kiosks receive server-side setup changes instantly over SSE; saving or
+  resetting the setup overlay no longer requires a browser refresh.
 - Setup Automation tab with Blueprint import/download links and a built-in
   Fully Kiosk switcher config helper.
 - Setup page scrolling is fixed for Home Assistant add-on Ingress, including
@@ -187,7 +187,7 @@ http://<docker-host>:8099/now_showing.html
 ```
 
 For the stable v2 release, keep `TAG=latest` or pin this release with
-`TAG=2.3.0`. For the rolling `dev` branch image, set this in `docker/.env`:
+`TAG=2.3.4`. For the rolling `dev` branch image, set this in `docker/.env`:
 
 ```env
 TAG=dev

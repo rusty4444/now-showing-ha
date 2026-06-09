@@ -530,7 +530,7 @@ function mutateInPlace(target, next) {
   for (const k of Object.keys(next.visual || {})) target.visual[k] = next.visual[k];
 }
 
-export function setupRoute({ baseConfig, liveConfig, store }) {
+export function setupRoute({ baseConfig, liveConfig, store, eventBus }) {
   const r = Router();
 
   r.get('/api/setup', (_req, res) => {
@@ -549,7 +549,9 @@ export function setupRoute({ baseConfig, liveConfig, store }) {
       store.write(merged);
       const effective = applyOverlay(baseConfig, merged);
       mutateInPlace(liveConfig, effective);
-      return res.json(effectiveSetupView(liveConfig));
+      const view = effectiveSetupView(liveConfig);
+      if (eventBus) eventBus.broadcast({ type: 'config_changed', config: view });
+      return res.json(view);
     } catch (err) {
       console.error('[setup] save failed:', err.message);
       return res.status(500).json({ error: 'setup_save_failed', message: err.message });
@@ -561,7 +563,9 @@ export function setupRoute({ baseConfig, liveConfig, store }) {
       store.clear();
       const effective = applyOverlay(baseConfig, {});
       mutateInPlace(liveConfig, effective);
-      return res.json(effectiveSetupView(liveConfig));
+      const view = effectiveSetupView(liveConfig);
+      if (eventBus) eventBus.broadcast({ type: 'config_changed', config: view });
+      return res.json(view);
     } catch (err) {
       console.error('[setup] reset failed:', err.message);
       return res.status(500).json({ error: 'setup_reset_failed', message: err.message });
