@@ -18,7 +18,7 @@ import { createHaClient } from './ha.js';
 import { createHaWsClient } from './haWs.js';
 import { createEventBroadcaster } from './routes/events.js';
 import { createSwitcher, parseKiosks } from './switcher.js';
-import { normalise } from './state.js';
+import { createStateBroadcaster } from './stateBroadcaster.js';
 import { rootRoute } from './routes/root.js';
 import { healthzRoute } from './routes/healthz.js';
 import { stateRoute } from './routes/state.js';
@@ -158,27 +158,29 @@ if (isDirectRun) {
   // instead of forcing them to poll.
   if (config.haUrl && config.haToken) {
     const eventBus = app.get('eventBus');
+    const stateBroadcaster = createStateBroadcaster({
+      haClient,
+      stateCache,
+      config,
+      eventBus,
+    });
     haWs = createHaWsClient({
       haUrl: config.haUrl,
       haToken: config.haToken,
-      onStateChange: (data) => {
-        stateCache.invalidate('state');
-        const normalised = normalise([data.new_state], {
-          backend: config.backend,
-          player: config.player,
-          plexPlayer: config.plexPlayer,
-          plexUsername: config.plexUsername,
-        });
-        eventBus.broadcast(normalised || null);
+      onStateChange: () => {
+        void stateBroadcaster.handleStateChange();
       },
       onError: (err) => console.error(`[ha-ws] ${err.message}`),
     });
+    app.set('stateBroadcaster', stateBroadcaster);
     haWs.start();
   }
 
   // Global shutdown: stop WS client + switch before exiting
   function gracefulShutdown() {
     const bus = app.get('eventBus');
+    const stateBroadcaster = app.get('stateBroadcaster');
+    if (stateBroadcaster) stateBroadcaster.stop();
     if (bus) bus.close();
     if (haWs) haWs.stop();
     process.exit(0);
