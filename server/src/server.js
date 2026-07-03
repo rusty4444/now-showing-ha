@@ -19,6 +19,7 @@ import { createHaWsClient } from './haWs.js';
 import { createEventBroadcaster } from './routes/events.js';
 import { createSwitcher, parseKiosks } from './switcher.js';
 import { normalise } from './state.js';
+import { createStateBroadcaster } from './stateBroadcaster.js';
 import { rootRoute } from './routes/root.js';
 import { healthzRoute } from './routes/healthz.js';
 import { stateRoute } from './routes/state.js';
@@ -155,22 +156,22 @@ if (isDirectRun) {
   let haWs = null;
 
   // HA WebSocket subscription + SSE (#10): push state changes to browsers
-  // instead of forcing them to poll.
+  // instead of forcing them to poll. The broadcaster recomputes the payload
+  // over ALL entity states (same as /api/state) — see stateBroadcaster.js.
+  let stateBroadcaster = null;
   if (config.haUrl && config.haToken) {
     const eventBus = app.get('eventBus');
+    stateBroadcaster = createStateBroadcaster({
+      haClient,
+      config,
+      stateCache,
+      eventBus,
+      normalise,
+    });
     haWs = createHaWsClient({
       haUrl: config.haUrl,
       haToken: config.haToken,
-      onStateChange: (data) => {
-        stateCache.invalidate('state');
-        const normalised = normalise([data.new_state], {
-          backend: config.backend,
-          player: config.player,
-          plexPlayer: config.plexPlayer,
-          plexUsername: config.plexUsername,
-        });
-        eventBus.broadcast(normalised || null);
-      },
+      onStateChange: stateBroadcaster.onStateChange,
       onError: (err) => console.error(`[ha-ws] ${err.message}`),
     });
     haWs.start();
@@ -180,6 +181,7 @@ if (isDirectRun) {
   function gracefulShutdown() {
     const bus = app.get('eventBus');
     if (bus) bus.close();
+    if (stateBroadcaster) stateBroadcaster.stop();
     if (haWs) haWs.stop();
     process.exit(0);
   }
