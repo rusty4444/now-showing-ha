@@ -20,6 +20,17 @@ export function plexArtRoute({ config, fetchImpl = globalThis.fetch }) {
     if (!path.startsWith('/library/')) {
       return res.status(400).json({ error: 'path_must_be_library_relative' });
     }
+    // Reject dot segments (raw or percent-encoded) so a crafted path can't
+    // traverse out of /library/ once the URL is normalised, which would
+    // expose arbitrary Plex API endpoints with the server's token attached.
+    let decodedPath;
+    try { decodedPath = decodeURIComponent(path); } catch {
+      return res.status(400).json({ error: 'path_malformed' });
+    }
+    if (/%2e/i.test(path) || /%2e/i.test(decodedPath)
+      || decodedPath.includes('..') || decodedPath.includes('\\')) {
+      return res.status(400).json({ error: 'path_traversal_rejected' });
+    }
 
     try {
       const sep = path.includes('?') ? '&' : '?';
