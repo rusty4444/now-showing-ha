@@ -77,6 +77,7 @@ export function configRoute({ config }) {
       },
       visual: {
         progressBar: !!config.visual?.progressBar,
+        showPosterTitle: config.visual?.showPosterTitle !== false,
         ratingsBadges: !!config.visual?.ratingsBadges,
         genreChips: !!config.visual?.genreChips,
         infoPanelMode: config.visual?.infoPanelMode || 'on_tap',

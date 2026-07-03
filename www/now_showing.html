@@ -2925,6 +2925,7 @@
     // resolves still renders sanely.
     const VISUAL = {
       progressBar: false,
+      showPosterTitle: true,
       ratingsBadges: false,
       genreChips: false,
       infoPanelMode: 'on_tap',
@@ -3051,6 +3052,7 @@
       }
       const v = body.visual;
       if (v && typeof v.progressBar === 'boolean') VISUAL.progressBar = v.progressBar;
+      if (v && typeof v.showPosterTitle === 'boolean') VISUAL.showPosterTitle = v.showPosterTitle;
       if (v && typeof v.ratingsBadges === 'boolean') VISUAL.ratingsBadges = v.ratingsBadges;
       if (v && typeof v.genreChips === 'boolean') VISUAL.genreChips = v.genreChips;
       if (v && typeof v.infoPanelMode === 'string' && INFO_PANEL_MODES.includes(v.infoPanelMode)) VISUAL.infoPanelMode = v.infoPanelMode;
@@ -3098,6 +3100,7 @@
       // Local overrides apply first so the tablet still looks right even if
       // the server is briefly unreachable.
       VISUAL.progressBar = readBool('visualProgressBar', false);
+      VISUAL.showPosterTitle = readBool('visualShowPosterTitle', true);
       VISUAL.ratingsBadges = readBool('visualRatingsBadges', false);
       VISUAL.genreChips = readBool('visualGenreChips', false);
       VISUAL.infoPanelMode = readInfoPanelMode('on_tap');
@@ -5738,9 +5741,10 @@
       posterBgBlur.classList.remove('loaded');
       img.src = artworkUrl;
 
-      // Show overlay and title
-      posterOverlay.style.display = 'block';
-      posterTitle.style.display = 'block';
+      // Show overlay and title — both suppressed when the poster-title
+      // toggle is off (e.g. info panel pinned open, title would read twice).
+      posterOverlay.style.display = VISUAL.showPosterTitle ? 'block' : 'none';
+      posterTitle.style.display = VISUAL.showPosterTitle ? 'block' : 'none';
 
       // Build title text
       if (data.seriesTitle) {

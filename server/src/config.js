@@ -99,6 +99,10 @@ export function loadConfig(env = process.env) {
     // via GET /api/config.
     visual: {
       progressBar: parseBool(env.VISUAL_PROGRESS_BAR, false),
+      // Title/subtitle overlay pinned to the poster's bottom-left. Defaults
+      // ON to preserve the original look; turn off when the info panel is
+      // pinned open and the title would otherwise render twice.
+      showPosterTitle: parseBool(env.VISUAL_SHOW_POSTER_TITLE, true),
       ratingsBadges: parseBool(env.VISUAL_RATINGS_BADGES, false),
       // Render genre chips (Action, Sci-Fi, …) next to the content rating.
       // Populated from Plex metadata (item.Genre[]); empty for personal media.

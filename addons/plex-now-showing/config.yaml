@@ -85,6 +85,7 @@ options:
   # Visual toggles (V2 visual sprint). All default OFF so existing installs
   # keep the original look until the user opts in.
   visual_progress_bar: false
+  visual_show_poster_title: true
   visual_ratings_badges: false
   visual_genre_chips: false
   visual_info_panel_mode: on_tap
@@ -153,6 +154,7 @@ schema:
       playing_url: "url"
       stopped_url: "url?"
   visual_progress_bar: "bool"
+  visual_show_poster_title: "bool"
   visual_ratings_badges: "bool"
   visual_genre_chips: "bool"
   visual_info_panel_mode: "list(on_tap|on_pause|always)"

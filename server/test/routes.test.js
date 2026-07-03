@@ -159,6 +159,7 @@ test('GET /api/config defaults every visual toggle off', async () => {
       },
       visual: {
         progressBar: false,
+        showPosterTitle: true,
         ratingsBadges: false,
         genreChips: false,
         infoPanelMode: 'on_tap',
