@@ -155,6 +155,12 @@ configuration:
       Adds a slim gold progress bar along the bottom of the poster while
       something is playing. Freezes while paused, disappears when idle.
       Off by default; flip on to enable.
+  visual_show_poster_title:
+    name: Show title on poster
+    description: >-
+      Shows the movie/series title and episode subtitle overlaid on the
+      bottom-left of the poster art. On by default. Turn this off if you pin
+      the info panel open ("always") and the title reads twice.
   visual_ratings_badges:
     name: Show ratings badges
     description: >-

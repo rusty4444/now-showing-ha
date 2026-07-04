@@ -76,6 +76,7 @@ export const OVERLAY_TMDB_SECRET_KEYS = ['apiKey'];
 
 export const OVERLAY_VISUAL_KEYS = [
   'progressBar',
+  'showPosterTitle',
   'ratingsBadges',
   'genreChips',
   'infoPanelMode',
@@ -198,7 +199,7 @@ export function applyOverlay(baseConfig, overlay) {
 
   const v = overlay.visual || {};
   for (const k of OVERLAY_VISUAL_KEYS) {
-    if (['progressBar', 'ratingsBadges', 'genreChips', 'useBackdrops', 'burnInMitigation'].includes(k)) {
+    if (['progressBar', 'showPosterTitle', 'ratingsBadges', 'genreChips', 'useBackdrops', 'burnInMitigation'].includes(k)) {
       overrideBool(out.visual, v, k);
     } else if (['bulbSizePx', 'backdropDelayMs', 'nudgeIntervalMs', 'nudgeAmplitudePx',
                 'nightModeOpacity', 'cornerRadiusPx'].includes(k)) {

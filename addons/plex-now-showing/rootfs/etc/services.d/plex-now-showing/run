@@ -81,6 +81,7 @@ fi
 
 # ---- Visual toggles (V2 visual sprint) ----
 export_opt VISUAL_PROGRESS_BAR        visual_progress_bar
+export_opt VISUAL_SHOW_POSTER_TITLE   visual_show_poster_title
 export_opt VISUAL_RATINGS_BADGES      visual_ratings_badges
 export_opt VISUAL_GENRE_CHIPS         visual_genre_chips
 export_opt VISUAL_INFO_PANEL_MODE     visual_info_panel_mode

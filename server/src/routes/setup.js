@@ -242,6 +242,7 @@ export function sanitizeOverlayInput(body) {
         case 'infoShowTechbox':
         case 'infoShowPlayer':
         case 'progressBar':
+        case 'showPosterTitle':
         case 'ratingsBadges':
         case 'genreChips':
         case 'useBackdrops':
@@ -455,6 +456,7 @@ export function effectiveSetupView(config) {
     },
     visual: {
       progressBar: !!config.visual?.progressBar,
+      showPosterTitle: config.visual?.showPosterTitle !== false,
       ratingsBadges: !!config.visual?.ratingsBadges,
       genreChips: !!config.visual?.genreChips,
       infoPanelMode: config.visual?.infoPanelMode || 'on_tap',

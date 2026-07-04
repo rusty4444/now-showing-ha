@@ -85,6 +85,7 @@ options:
   # Visual toggles (V2 visual sprint). All default OFF so existing installs
   # keep the original look until the user opts in.
   visual_progress_bar: false
+  visual_show_poster_title: true
   visual_ratings_badges: false
   visual_genre_chips: false
   visual_info_panel_mode: on_tap
@@ -153,6 +154,7 @@ schema:
       playing_url: "url"
       stopped_url: "url?"
   visual_progress_bar: "bool"
+  visual_show_poster_title: "bool"
   visual_ratings_badges: "bool"
   visual_genre_chips: "bool"
   visual_info_panel_mode: "list(on_tap|on_pause|always)"
@@ -167,7 +169,7 @@ schema:
   visual_nudge_amplitude_px: "int(1,16)"
   visual_night_mode_entity: "str?"
   visual_night_mode_opacity: "float(0,0.95)"
-  visual_theme: "list(classic-gold|art-deco-silver|neon-80s|minimalist-dark)"
+  visual_theme: "list(classic-gold|art-deco-silver|neon-80s|minimalist-dark|film-noir|velvet-crimson|technicolor|drive-in-dusk|emerald-deco|midnight-imax|rose-gold|grindhouse|phosphor-terminal|vaporwave|miami-deco|golden-silent|cosmic|molten|frostbite|solaris)"
   visual_accent_color: "str?"
   visual_marquee_bg_color: "str?"
   visual_corner_radius_px: "int(0,48)"

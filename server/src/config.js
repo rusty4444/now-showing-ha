@@ -99,6 +99,10 @@ export function loadConfig(env = process.env) {
     // via GET /api/config.
     visual: {
       progressBar: parseBool(env.VISUAL_PROGRESS_BAR, false),
+      // Title/subtitle overlay pinned to the poster's bottom-left. Defaults
+      // ON to preserve the original look; turn off when the info panel is
+      // pinned open and the title would otherwise render twice.
+      showPosterTitle: parseBool(env.VISUAL_SHOW_POSTER_TITLE, true),
       ratingsBadges: parseBool(env.VISUAL_RATINGS_BADGES, false),
       // Render genre chips (Action, Sci-Fi, …) next to the content rating.
       // Populated from Plex metadata (item.Genre[]); empty for personal media.
@@ -173,7 +177,7 @@ export function loadConfig(env = process.env) {
       // Composes with the per-axis controls below; explicit values beat
       // preset defaults.
       theme: parseEnum(env.VISUAL_THEME,
-        ['classic-gold', 'art-deco-silver', 'neon-80s', 'minimalist-dark'],
+        ['classic-gold', 'art-deco-silver', 'neon-80s', 'minimalist-dark', 'film-noir', 'velvet-crimson', 'technicolor', 'drive-in-dusk', 'emerald-deco', 'midnight-imax', 'rose-gold', 'grindhouse', 'phosphor-terminal', 'vaporwave', 'miami-deco', 'golden-silent', 'cosmic', 'molten', 'frostbite', 'solaris'],
         'classic-gold'),
       // Accent colour override (#66). Drives --accent-light/mid/dark/glow,
       // which the marquee trim, gold-line frame, ratings highlight and chip

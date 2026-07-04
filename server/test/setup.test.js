@@ -344,6 +344,23 @@ test('sanitizeOverlayInput drops unknown fields', () => {
   assert.equal(overlay.comingSoon.title, 'ok');
 });
 
+test('showPosterTitle survives the setup overlay round-trip', () => {
+  // Overlay UI parity: the poster-title toggle must sanitize, persist, and
+  // apply like every other visual bool — a false must reach the effective
+  // config (not be dropped as "unset").
+  const { overlay, errors } = sanitizeOverlayInput({ visual: { showPosterTitle: false } });
+  assert.equal(errors.length, 0);
+  assert.equal(overlay.visual.showPosterTitle, false);
+
+  const merged = applyOverlay(envBaseConfig(), overlay);
+  assert.equal(merged.visual.showPosterTitle, false);
+  assert.equal(effectiveSetupView(merged).visual.showPosterTitle, false);
+});
+
+test('showPosterTitle defaults on when no overlay override is set', () => {
+  assert.equal(effectiveSetupView(envBaseConfig()).visual.showPosterTitle, true);
+});
+
 test('mergeOverlay preserves existing secrets when blank, drops blank non-secrets', () => {
   const existing = {
     plexUrl: 'http://old',
