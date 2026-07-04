@@ -158,18 +158,33 @@ if (isDirectRun) {
   // instead of forcing them to poll.
   if (config.haUrl && config.haToken) {
     const eventBus = app.get('eventBus');
+    // Debounce timer for state-change broadcasts (#108): bursty media_player
+    // events from unrelated players normalise to null when processed one at a
+    // time, so we wait 300ms for the burst to settle, then recompute over ALL
+    // HA states (the same computation /api/state serves). Never broadcasts on
+    // transient HA fetch errors — lets the client fall back to polling.
+    let stateBroadcastTimer = null;
     haWs = createHaWsClient({
       haUrl: config.haUrl,
       haToken: config.haToken,
-      onStateChange: (data) => {
+      onStateChange: (_data) => {
         stateCache.invalidate('state');
-        const normalised = normalise([data.new_state], {
-          backend: config.backend,
-          player: config.player,
-          plexPlayer: config.plexPlayer,
-          plexUsername: config.plexUsername,
-        });
-        eventBus.broadcast(normalised || null);
+        if (stateBroadcastTimer) clearTimeout(stateBroadcastTimer);
+        stateBroadcastTimer = setTimeout(async () => {
+          try {
+            const states = await haClient.getStates();
+            const normalised = normalise(states, {
+              backend: config.backend,
+              player: config.player,
+              plexPlayer: config.plexPlayer,
+              plexUsername: config.plexUsername,
+            });
+            eventBus.broadcast(normalised || null);
+          } catch (err) {
+            // Transient HA error — don't push null to kiosks, let them poll.
+            console.error(`[state-broadcast] fetch failed: ${err.message}`);
+          }
+        }, 300);
       },
       onError: (err) => console.error(`[ha-ws] ${err.message}`),
     });
