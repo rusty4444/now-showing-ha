@@ -52,16 +52,13 @@ not exposed to the tablet browser.
 
 ## What's Changed Since The Last Release
 
-V2.3.4 focuses on live kiosk behaviour: configuration changes now reach open browsers immediately, Coming Soon screens cycle themselves, and poster transitions stay smooth.
+V2.3.5 fixes a long-standing kiosk display regression where unrelated media-player state changes caused SSE `/api/events` to broadcast `null`, blanking the Now Showing overlay on active kiosks.
 
-| Area | V2.3.4 change |
+| Area | V2.3.5 change |
 |------|---------------|
-| Live setup sync | Saving or resetting `/api/setup` now broadcasts a sanitized `config_changed` event on `/api/events`, so open kiosks apply display mode, backend, Coming Soon, and visual setting changes without refresh. Secrets are still represented only as `*Set` booleans. |
-| Coming Soon cycle | Coming Soon mode starts a browser-side timer from `coming_soon_cycle_interval` and re-polls `/api/coming-soon` on that cadence, giving Radarr/Sonarr posters a screensaver-style rotation. SSE config changes restart or stop the timer immediately. |
-| Poster transition | Artwork updates now preload into a second poster layer and crossfade into the active layer, avoiding black flashes during rotations while keeping the existing `/api/artwork` proxy path intact. Slow stale image loads are ignored. |
-| Visual compatibility | Ken Burns animation is scoped to the active poster layer so it does not fight the crossfade buffer. Existing poster framing, overlay, backdrop, and artwork proxy behaviour is preserved. |
-| Test reliability | Added an SSE broadcast test for setup saves and made the Coming Soon route test date-relative so it does not fail after a fixed release date passes. |
-| Release package | Home Assistant add-on and Node server are versioned at `2.3.4`, with the release notes above replacing the old v2.3.0 comparison table. |
+| SSE state broadcast | The add-on now recomputes the Now Showing payload from **all** Home Assistant media_player states after a debounce window, instead of normalising only the changed entity. This prevents `null` broadcasts that blanked the kiosk overlay when another media player in the house changed state during active playback. A new `stateBroadcaster` module with full test coverage handles debouncing, error resilience, and graceful shutdown. (#112) |
+| Release package | Home Assistant add-on and Node server are versioned at `2.3.5`.
+
 
 ## Features
 
