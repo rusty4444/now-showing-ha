@@ -6,9 +6,9 @@
   </a>
 </p>
 
-> This README describes Now Showing v2.3.4. This release builds on the
-> v2.3.x live streaming architecture with instant setup propagation,
-> Coming Soon auto-cycling, and smooth poster crossfades.
+> This README describes Now Showing v2.3.9. This maintenance release updates
+> the add-on's WebSocket client while preserving the existing v2.3 behaviour
+> and configuration.
 
 A full-screen cinema marquee display for Home Assistant that shows what is
 currently playing on Plex, Jellyfin, Emby, Kodi, Apple TV, generic streaming
@@ -52,12 +52,15 @@ not exposed to the tablet browser.
 
 ## What's Changed Since The Last Release
 
-V2.3.5 fixes a long-standing kiosk display regression where unrelated media-player state changes caused SSE `/api/events` to broadcast `null`, blanking the Now Showing overlay on active kiosks.
+V2.3.9 is a maintenance release following v2.3.8. It updates the Node server's
+WebSocket client dependency without changing the add-on configuration or
+runtime requirements.
 
-| Area | V2.3.5 change |
+| Area | V2.3.9 change |
 |------|---------------|
-| SSE state broadcast | The add-on now recomputes the Now Showing payload from **all** Home Assistant media_player states after a debounce window, instead of normalising only the changed entity. This prevents `null` broadcasts that blanked the kiosk overlay when another media player in the house changed state during active playback. A new `stateBroadcaster` module with full test coverage handles debouncing, error resilience, and graceful shutdown. (#112) |
-| Release package | Home Assistant add-on and Node server are versioned at `2.3.5`.
+| WebSocket client | Updates `ws` from `8.21.3` to `8.22.0`, adding upstream protocol support and correcting invalid-close state handling. Existing Now Showing calls remain compatible. |
+| Compatibility | Node.js `>=20` remains the runtime floor; all five architecture builds and the add-on config check passed before merge. |
+| Release package | Home Assistant add-on and Node server metadata are aligned at `2.3.9`. |
 
 
 ## Features
@@ -184,7 +187,7 @@ http://<docker-host>:8099/now_showing.html
 ```
 
 For the stable v2 release, keep `TAG=latest` or pin this release with
-`TAG=2.3.4`. For the rolling `dev` branch image, set this in `docker/.env`:
+`TAG=2.3.9`. For the rolling `dev` branch image, set this in `docker/.env`:
 
 ```env
 TAG=dev

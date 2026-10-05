@@ -4,6 +4,13 @@ Cinema-style now-playing and coming-soon kiosk for Home Assistant, installed
 straight from the Home Assistant add-on store. One click, no long-lived access
 token, no Docker command line.
 
+## What's new in 2.3.9
+
+- **WebSocket client maintenance** — updates `ws` from `8.21.3` to `8.22.0`
+  while retaining the existing Node.js 20 runtime floor and client API usage.
+- **No configuration changes** — existing add-on options and installations keep
+  their current behaviour.
+
 ## What's new in 2.3.4
 
 - **Instant setup propagation** — saving or resetting the in-app setup overlay
