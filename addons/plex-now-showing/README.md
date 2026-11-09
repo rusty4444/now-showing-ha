@@ -4,12 +4,14 @@ Cinema-style now-playing and coming-soon kiosk for Home Assistant, installed
 straight from the Home Assistant add-on store. One click, no long-lived access
 token, no Docker command line.
 
-## What's new in 2.3.9
+## What's new in 2.3.10
 
-- **WebSocket client maintenance** — updates `ws` from `8.21.3` to `8.22.0`
-  while retaining the existing Node.js 20 runtime floor and client API usage.
-- **No configuration changes** — existing add-on options and installations keep
-  their current behaviour.
+- **Node server dependency maintenance** — updates `express` from `5.2.1` to
+  `5.3.0` (with transitive `body-parser` `2.3.0` → `2.4.0`) and `ws` from
+  `8.22.0` to `8.22.1`, retaining the existing Node.js 20 runtime floor and
+  client API usage.
+- **Version alignment** — the add-on and Node server metadata are aligned at
+  `2.3.10`; configuration options and behaviour are unchanged.
 
 ## What's new in 2.3.4
 

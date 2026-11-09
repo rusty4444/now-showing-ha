@@ -3,6 +3,13 @@
 All notable changes to the Now Showing add-on will be documented here.
 The project follows [Semantic Versioning](https://semver.org/).
 
+## 2.3.10 - 2026-11-10
+
+### Changed
+- Updated the Node server's `express` dependency from `5.2.1` to `5.3.0` and its transitive `body-parser` from `2.3.0` to `2.4.0`.
+- Updated the Node server's `ws` dependency from `8.22.0` to `8.22.1`.
+- Aligned the Home Assistant add-on and Node server version metadata at `2.3.10`.
+
 ## 2.3.9 - 2026-10-06
 
 ### Changed

@@ -6,9 +6,9 @@
   </a>
 </p>
 
-> This README describes Now Showing v2.3.9. This maintenance release updates
-> the add-on's WebSocket client while preserving the existing v2.3 behaviour
-> and configuration.
+> This README describes Now Showing v2.3.10. This maintenance release updates
+> the add-on's Node server dependencies while preserving the existing v2.3
+> behaviour and configuration.
 
 A full-screen cinema marquee display for Home Assistant that shows what is
 currently playing on Plex, Jellyfin, Emby, Kodi, Apple TV, generic streaming
@@ -52,15 +52,16 @@ not exposed to the tablet browser.
 
 ## What's Changed Since The Last Release
 
-V2.3.9 is a maintenance release following v2.3.8. It updates the Node server's
-WebSocket client dependency without changing the add-on configuration or
+V2.3.10 is a maintenance release following v2.3.9. It updates the Node server's
+HTTP and WebSocket dependencies without changing the add-on configuration or
 runtime requirements.
 
-| Area | V2.3.9 change |
+| Area | V2.3.10 change |
 |------|---------------|
-| WebSocket client | Updates `ws` from `8.21.3` to `8.22.0`, adding upstream protocol support and correcting invalid-close state handling. Existing Now Showing calls remain compatible. |
+| HTTP server | Updates `express` from `5.2.1` to `5.3.0` and its transitive `body-parser` from `2.3.0` to `2.4.0`; the add-on's routes and middleware are unchanged. |
+| WebSocket client | Updates `ws` from `8.22.0` to `8.22.1`, correcting IPC URL path handling and empty-frame emission. Existing Now Showing calls remain compatible. |
 | Compatibility | Node.js `>=20` remains the runtime floor; all five architecture builds and the add-on config check passed before merge. |
-| Release package | Home Assistant add-on and Node server metadata are aligned at `2.3.9`. |
+| Release package | Home Assistant add-on and Node server metadata are aligned at `2.3.10`. |
 
 
 ## Features
@@ -187,7 +188,7 @@ http://<docker-host>:8099/now_showing.html
 ```
 
 For the stable v2 release, keep `TAG=latest` or pin this release with
-`TAG=2.3.9`. For the rolling `dev` branch image, set this in `docker/.env`:
+`TAG=2.3.10`. For the rolling `dev` branch image, set this in `docker/.env`:
 
 ```env
 TAG=dev
