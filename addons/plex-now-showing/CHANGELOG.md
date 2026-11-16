@@ -3,6 +3,12 @@
 All notable changes to the Now Showing add-on will be documented here.
 The project follows [Semantic Versioning](https://semver.org/).
 
+## 2.3.11 - 2026-11-17
+
+### Changed
+- Updated the Node server's `ws` dependency from `8.22.1` to `8.23.0`. The new version limits automatically queued pong replies, fixing an upstream memory-exhaustion issue triggered by ping floods. The add-on uses `ws` only to connect to your own Home Assistant, so practical exposure was limited.
+- Aligned the Home Assistant add-on and Node server version metadata at `2.3.11`.
+
 ## 2.3.10 - 2026-11-10
 
 ### Changed
